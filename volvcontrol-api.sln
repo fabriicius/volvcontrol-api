@@ -1,0 +1,43 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.33530.505
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "volvcontrol-api", "volvcontrol-api\volvcontrol-api.csproj", "{A3A05BF4-3C03-48A7-B68A-037B41054427}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "volvcontrol-api.repository", "volvcontrol-api.repository\volvcontrol-api.repository.csproj", "{B9C210C7-E89D-4FCC-907F-070B20EE2456}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "volvcontrol-api.domain", "volvcontrol-api.domain\volvcontrol-api.domain.csproj", "{90FA46A3-C716-42D5-A5AD-0D3FC99FE9EB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "volvcontrol-api.service", "volvcontrol-api.service\volvcontrol-api.service.csproj", "{B47A3443-D474-4557-92FF-9D18B8761FD6}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A3A05BF4-3C03-48A7-B68A-037B41054427}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A3A05BF4-3C03-48A7-B68A-037B41054427}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A3A05BF4-3C03-48A7-B68A-037B41054427}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A3A05BF4-3C03-48A7-B68A-037B41054427}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B9C210C7-E89D-4FCC-907F-070B20EE2456}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B9C210C7-E89D-4FCC-907F-070B20EE2456}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B9C210C7-E89D-4FCC-907F-070B20EE2456}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B9C210C7-E89D-4FCC-907F-070B20EE2456}.Release|Any CPU.Build.0 = Release|Any CPU
+		{90FA46A3-C716-42D5-A5AD-0D3FC99FE9EB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{90FA46A3-C716-42D5-A5AD-0D3FC99FE9EB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{90FA46A3-C716-42D5-A5AD-0D3FC99FE9EB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{90FA46A3-C716-42D5-A5AD-0D3FC99FE9EB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B47A3443-D474-4557-92FF-9D18B8761FD6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B47A3443-D474-4557-92FF-9D18B8761FD6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B47A3443-D474-4557-92FF-9D18B8761FD6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B47A3443-D474-4557-92FF-9D18B8761FD6}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {8B9AB43F-EB46-4BA9-BF92-4FA1A85A4C44}
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,17 @@
+namespace volvcontrol_api.repository.Entities;
+
+public class User
+{
+    public int Id { get; set; }
+    public int CompanyId { get; set; }
+    public int UsersPositionId { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
+    public string Password { get; set; } = string.Empty;
+    public byte Status { get; set; } = 1;
+    public DateTime CreatedDate { get; set; }
+    public DateTime UpdatedDate { get; set; }
+
+    public Company Company { get; set; }
+    public UsersPosition UsersPosition { get; set; }
+}
