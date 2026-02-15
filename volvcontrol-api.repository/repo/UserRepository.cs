@@ -2,7 +2,7 @@ using Dapper;
 using MySqlConnector;
 using volvcontrol_api.domain.Entities;
 using volvcontrol_api.domain.Interfaces.Repository;
-using volvcontrol_api.domain.Model;
+using volvcontrol_api.domain.Model.Request;
 
 namespace volvcontrol_api.repository.repo;
 
@@ -24,6 +24,7 @@ public class UserRepository : IUserRepository
             VALUES (@CompanyId, @UsersPositionId, @Name, @Email, @Password, @Status, @CreatedDate, @UpdatedDate);
             SELECT CAST(LAST_INSERT_ID() AS SIGNED);";
 
+            const byte newUserStatus = 1;
             var now = DateTime.UtcNow;
             var param = new
             {
@@ -32,7 +33,7 @@ public class UserRepository : IUserRepository
                 request.Name,
                 request.Email,
                 request.Password,
-                request.Status,
+                Status = newUserStatus,
                 CreatedDate = now,
                 UpdatedDate = now
             };
@@ -52,7 +53,7 @@ public class UserRepository : IUserRepository
                     Name = request.Name,
                     Email = request.Email,
                     Password = request.Password,
-                    Status = request.Status,
+                    Status = newUserStatus,
                     CreatedDate = now,
                     UpdatedDate = now
                 };
@@ -70,6 +71,21 @@ public class UserRepository : IUserRepository
         catch (Exception ex)
         {
             throw new InvalidOperationException($"Error on CreateAsync (User): {ex.Message}", ex);
+        }
+    }
+
+    public async Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            const string sql = "SELECT id AS Id, email AS Email FROM users WHERE email = @Email LIMIT 1";
+            await using var conn = new MySqlConnection(_connectionString);
+            await conn.OpenAsync(cancellationToken);
+            return await conn.QuerySingleOrDefaultAsync<User>(new CommandDefinition(sql, new { Email = email }, cancellationToken: cancellationToken));
+        }
+        catch (MySqlException ex)
+        {
+            throw new InvalidOperationException($"Database error on GetByEmailAsync (User): {ex.Message}", ex);
         }
     }
 
@@ -184,6 +200,22 @@ public class UserRepository : IUserRepository
         catch (Exception ex)
         {
             throw new InvalidOperationException($"Error on UpdateAsync (User): {ex.Message}", ex);
+        }
+    }
+
+    public async Task UpdateEmailAsync(string oldEmail, string newEmail, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            const string sql = "UPDATE users SET email = @NewEmail, updated_date = @UpdatedDate WHERE email = @OldEmail";
+            var updatedDate = DateTime.UtcNow;
+            await using var conn = new MySqlConnection(_connectionString);
+            await conn.OpenAsync(cancellationToken);
+            await conn.ExecuteAsync(new CommandDefinition(sql, new { OldEmail = oldEmail, NewEmail = newEmail, UpdatedDate = updatedDate }, cancellationToken: cancellationToken));
+        }
+        catch (MySqlException ex)
+        {
+            throw new InvalidOperationException($"Database error on UpdateEmailAsync (User): {ex.Message}", ex);
         }
     }
 

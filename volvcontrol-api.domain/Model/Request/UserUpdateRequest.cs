@@ -1,7 +1,8 @@
-namespace volvcontrol_api.domain.Model;
+namespace volvcontrol_api.domain.Model.Request;
 
-public class UserCreateRequest
+public class UserUpdateRequest
 {
+    public int Id { get; set; }
     public int CompanyId { get; set; }
     public int UsersPositionId { get; set; }
     public string Name { get; set; } = string.Empty;

@@ -1,5 +1,6 @@
 using volvcontrol_api.domain.Entities;
-using volvcontrol_api.domain.Model;
+using volvcontrol_api.domain.Model.Request;
+using volvcontrol_api.domain.Model.Response;
 
 namespace volvcontrol_api.domain.Map;
 

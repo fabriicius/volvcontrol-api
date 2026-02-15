@@ -1,4 +1,4 @@
-namespace volvcontrol_api.domain.Model;
+namespace volvcontrol_api.domain.Model.Response;
 
 public class CompanyResponse
 {

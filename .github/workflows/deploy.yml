@@ -1,0 +1,93 @@
+# Deploy VolvControl API no servidor via SSH
+# A imagem Docker é construída e etiquetada com o nome da branch (main, develop, etc.).
+# Secrets necessários (Settings > Secrets and variables > Actions):
+#   DEPLOY_HOST, DEPLOY_USER, DEPLOY_SSH_KEY - SSH do servidor
+#   DOCKERHUB_USERNAME, DOCKERHUB_TOKEN     - Login Docker Hub para push da imagem
+
+name: Deploy to Server
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch para deploy'
+        required: true
+        default: 'main'
+
+env:
+  IMAGE_NAME: volvcontrol/volvcontrol-api
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    outputs:
+      branch_tag: ${{ steps.meta.outputs.branch_tag }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.branch || github.ref }}
+
+      - name: Set branch tag
+        id: meta
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "branch_tag=${{ github.event.inputs.branch }}" >> $GITHUB_OUTPUT
+          else
+            echo "branch_tag=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: volvcontrol-api/Dockerfile
+          push: true
+          tags: |
+            ${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.branch_tag }}
+            ${{ env.IMAGE_NAME }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          port: ${{ secrets.DEPLOY_PORT || 22 }}
+          script: |
+            set -e
+            BRANCH_TAG="${{ needs.build-and-push.outputs.branch_tag }}"
+            echo ">>> Deploying image tag: ${BRANCH_TAG}"
+            echo ">>> Parando e removendo container atual..."
+            docker stop volvcontrol-api 2>/dev/null || true
+            docker rm -f volvcontrol-api 2>/dev/null || true
+            echo ">>> Baixando imagem da branch: ${BRANCH_TAG}"
+            docker pull ${{ env.IMAGE_NAME }}:${BRANCH_TAG}
+            echo ">>> Iniciando novo container..."
+            docker run -d \
+              --name volvcontrol-api \
+              --restart unless-stopped \
+              -p 8080:80 \
+              -e ASPNETCORE_ENVIRONMENT=Production \
+              ${{ env.IMAGE_NAME }}:${BRANCH_TAG}
+            echo ">>> Deploy concluído (branch/tag: ${BRANCH_TAG})."
+            docker ps --filter name=volvcontrol-api

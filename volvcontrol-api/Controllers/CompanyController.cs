@@ -2,7 +2,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using volvcontrol_api.Authorization;
 using volvcontrol_api.domain.Interfaces.Service;
-using volvcontrol_api.domain.Model;
+using volvcontrol_api.domain.Model.Request;
+using volvcontrol_api.domain.Model.Response;
 
 namespace volvcontrol_api.Controllers;
 
@@ -20,6 +21,7 @@ public class CompanyController : ControllerBase
 
     /// <summary>Cria uma nova empresa.</summary>
     [HttpPost]
+    [AllowAnonymous]
     [ProducesResponseType(typeof(CompanyResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<CompanyResponse>> Create([FromBody] CompanyCreateRequest request, CancellationToken cancellationToken)

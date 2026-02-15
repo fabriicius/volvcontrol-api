@@ -1,7 +1,8 @@
 using volvcontrol_api.domain.Interfaces.Repository;
 using volvcontrol_api.domain.Interfaces.Service;
 using volvcontrol_api.domain.Map;
-using volvcontrol_api.domain.Model;
+using volvcontrol_api.domain.Model.Request;
+using volvcontrol_api.domain.Model.Response;
 
 namespace volvcontrol_api.service.services;
 

@@ -2,7 +2,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using volvcontrol_api.Authorization;
 using volvcontrol_api.domain.Interfaces.Service;
-using volvcontrol_api.domain.Model;
+using volvcontrol_api.domain.Model.Request;
+using volvcontrol_api.domain.Model.Response;
 using volvcontrol_api.Services;
 
 namespace volvcontrol_api.Controllers;
@@ -23,6 +24,7 @@ public class UserController : ControllerBase
 
     /// <summary>Cria um novo usuário.</summary>
     [HttpPost]
+    [AllowAnonymous]
     [ProducesResponseType(typeof(UserResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<UserResponse>> Create([FromBody] UserCreateRequest request, CancellationToken cancellationToken)

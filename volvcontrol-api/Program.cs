@@ -22,6 +22,9 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ICompanyRepository>(_ => new CompanyRepository(connectionString));
 builder.Services.AddScoped<ICompanyService, CompanyService>();
 
+builder.Services.AddScoped<IClientRepository>(_ => new ClientRepository(connectionString));
+builder.Services.AddScoped<IClientService, ClientService>();
+
 var jwtKey = builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("Jwt:Key não configurada.");
 var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "VolvControlApi";
 var jwtAudience = builder.Configuration["Jwt:Audience"] ?? "VolvControlApi";
@@ -46,6 +49,16 @@ builder.Services.AddAuthorization(options =>
     // Exige que o usuário tenha position_description = ADM para acessar o endpoint.
     options.AddPolicy(AuthConstants.AdmOnlyPolicy, policy =>
         policy.RequireClaim(AuthConstants.PositionDescriptionClaim, AuthConstants.PositionAdm));
+});
+
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
 });
 
 builder.Services.AddControllers();
@@ -81,15 +94,15 @@ builder.Services.AddSwaggerGen(options =>
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-else
+app.UseSwagger();
+app.UseSwaggerUI();
+
+if (!app.Environment.IsDevelopment())
 {
     app.UseHttpsRedirection();
 }
+
+app.UseCors();
 
 app.UseAuthentication();
 app.UseAuthorization();
