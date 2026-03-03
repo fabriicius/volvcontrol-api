@@ -22,6 +22,9 @@ appsettings.*.local.json
 *.rsuser
 secrets.json
 
+# Firebase credentials (contém chave privada - não versionar)
+**/FirebaseCredentials/*.json
+
 # NuGet
 *.nupkg
 *.snupkg

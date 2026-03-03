@@ -1,4 +1,4 @@
-namespace volvcontrol_api.repository.Entities;
+namespace volvcontrol_api.domain.Entities;
 
 public class Equipment
 {
@@ -18,7 +18,9 @@ public class Equipment
     public DateTime CreatedDate { get; set; }
     public DateTime UpdatedDate { get; set; }
 
-    public Client Client { get; set; }
-    public Category Category { get; set; }
-    public StatusEquipment StatusEquipment { get; set; }
+    public string? CategoryDescription { get; set; }
+    public string? TypeDescription { get; set; }
+
+    public Client? Client { get; set; }
+    public StatusEquipment? StatusEquipment { get; set; }
 }

@@ -1,0 +1,7 @@
+-- Tabela image para o CRUD de imagens
+CREATE TABLE IF NOT EXISTS image (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    url VARCHAR(2048) NOT NULL,
+    description VARCHAR(500) NOT NULL DEFAULT '',
+    created_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+);

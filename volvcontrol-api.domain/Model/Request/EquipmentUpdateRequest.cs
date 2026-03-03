@@ -1,6 +1,6 @@
-namespace volvcontrol_api.repository.Entities;
+namespace volvcontrol_api.domain.Model.Request;
 
-public class Equipment
+public class EquipmentUpdateRequest
 {
     public int Id { get; set; }
     public string Name { get; set; } = string.Empty;
@@ -15,10 +15,4 @@ public class Equipment
     public int StatusEquipmentId { get; set; }
     public string PhotoUrl { get; set; } = string.Empty;
     public string Notes { get; set; } = string.Empty;
-    public DateTime CreatedDate { get; set; }
-    public DateTime UpdatedDate { get; set; }
-
-    public Client Client { get; set; }
-    public Category Category { get; set; }
-    public StatusEquipment StatusEquipment { get; set; }
 }

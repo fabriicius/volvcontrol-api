@@ -8,6 +8,7 @@ using volvcontrol_api.domain.Interfaces.Repository;
 using volvcontrol_api.domain.Interfaces.Service;
 using volvcontrol_api.repository.repo;
 using volvcontrol_api.service.services;
+using volvcontrol_api.service.firebase;
 using volvcontrol_api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -24,6 +25,24 @@ builder.Services.AddScoped<ICompanyService, CompanyService>();
 
 builder.Services.AddScoped<IClientRepository>(_ => new ClientRepository(connectionString));
 builder.Services.AddScoped<IClientService, ClientService>();
+
+builder.Services.AddScoped<IEquipmentRepository>(_ => new EquipmentRepository(connectionString));
+builder.Services.AddScoped<IEquipmentService, EquipmentService>();
+
+builder.Services.AddScoped<IImageRepository>(_ => new ImageRepository(connectionString));
+builder.Services.AddScoped<IImageService, ImageService>();
+
+// Firebase Storage e PhotoStorage (pastas: Company/IdCliente/tipo/IdEntidade)
+var firebaseCredentialsPath = builder.Configuration["Firebase:CredentialsPath"];
+if (!string.IsNullOrWhiteSpace(firebaseCredentialsPath))
+{
+    var contentRoot = builder.Environment.ContentRootPath;
+    var fullPath = Path.IsPathRooted(firebaseCredentialsPath)
+        ? firebaseCredentialsPath
+        : Path.GetFullPath(Path.Combine(contentRoot, firebaseCredentialsPath));
+    builder.Services.AddScoped<IFirebaseStorageService>(_ => new FirebaseStorageService(fullPath));
+    builder.Services.AddScoped<IPhotoStorage, PhotoStorage>();
+}
 
 var jwtKey = builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("Jwt:Key não configurada.");
 var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "VolvControlApi";
