@@ -8,8 +8,8 @@ public class EquipmentResponse
     public string Name { get; set; } = string.Empty;
     public int ClientId { get; set; }
     public string QrCode { get; set; } = string.Empty;
-    public long EquipmentCategoryId { get; set; }
-    public long EquipmentTypeId { get; set; }
+    public int EquipmentCategoryId { get; set; }
+    public int EquipmentTypeId { get; set; }
     public string CategoryDescription { get; set; } = string.Empty;
     public string TypeDescription { get; set; } = string.Empty;
     public string Brand { get; set; } = string.Empty;
@@ -17,6 +17,7 @@ public class EquipmentResponse
     public DateOnly? InstallationDate { get; set; }
     public DateOnly? WarrantyUntil { get; set; }
     public int StatusEquipmentId { get; set; }
+    public string StatusEquipmentDescription { get; set; } = string.Empty;
     public string PhotoUrl { get; set; } = string.Empty;
     [JsonPropertyName("imagebase64")]
     public string ImageBase64 { get; set; } = string.Empty;

@@ -3,6 +3,7 @@ namespace volvcontrol_api.domain.Model.Response;
 public class ClientResponse
 {
     public int Id { get; set; }
+    public int UserId { get; set; }
     public int PlansId { get; set; }
     public int StatusClientId { get; set; }
     public string Name { get; set; } = string.Empty;

@@ -2,16 +2,19 @@ using Dapper;
 using MySqlConnector;
 using volvcontrol_api.domain.Entities;
 using volvcontrol_api.domain.Interfaces.Repository;
+using volvcontrol_api.repository.logging;
 
 namespace volvcontrol_api.repository.repo;
 
 public class CompanyRepository : ICompanyRepository
 {
     private readonly string _connectionString;
+    private readonly RepositoryErrorLogger _errorLogger;
 
     public CompanyRepository(string connectionString)
     {
         _connectionString = connectionString ?? throw new ArgumentNullException(nameof(connectionString));
+        _errorLogger = new RepositoryErrorLogger(_connectionString);
     }
 
     public async Task<Company> CreateAsync(Company company, CancellationToken cancellationToken = default)
@@ -56,10 +59,12 @@ public class CompanyRepository : ICompanyRepository
         }
         catch (MySqlException ex)
         {
+            await _errorLogger.LogAsync(nameof(CompanyRepository), nameof(CreateAsync), ex, cancellationToken);
             throw new InvalidOperationException($"Database error on CreateAsync (Company): {ex.Message}", ex);
         }
         catch (Exception ex)
         {
+            await _errorLogger.LogAsync(nameof(CompanyRepository), nameof(CreateAsync), ex, cancellationToken);
             throw new InvalidOperationException($"Error on CreateAsync (Company): {ex.Message}", ex);
         }
     }
@@ -80,10 +85,12 @@ public class CompanyRepository : ICompanyRepository
         }
         catch (MySqlException ex)
         {
+            await _errorLogger.LogAsync(nameof(CompanyRepository), nameof(GetByIdAsync), ex, cancellationToken);
             throw new InvalidOperationException($"Database error on GetByIdAsync (Company): {ex.Message}", ex);
         }
         catch (Exception ex)
         {
+            await _errorLogger.LogAsync(nameof(CompanyRepository), nameof(GetByIdAsync), ex, cancellationToken);
             throw new InvalidOperationException($"Error on GetByIdAsync (Company): {ex.Message}", ex);
         }
     }
@@ -105,10 +112,12 @@ public class CompanyRepository : ICompanyRepository
         }
         catch (MySqlException ex)
         {
+            await _errorLogger.LogAsync(nameof(CompanyRepository), nameof(GetAllAsync), ex, cancellationToken);
             throw new InvalidOperationException($"Database error on GetAllAsync (Company): {ex.Message}", ex);
         }
         catch (Exception ex)
         {
+            await _errorLogger.LogAsync(nameof(CompanyRepository), nameof(GetAllAsync), ex, cancellationToken);
             throw new InvalidOperationException($"Error on GetAllAsync (Company): {ex.Message}", ex);
         }
     }
@@ -155,10 +164,12 @@ public class CompanyRepository : ICompanyRepository
         }
         catch (MySqlException ex)
         {
+            await _errorLogger.LogAsync(nameof(CompanyRepository), nameof(UpdateAsync), ex, cancellationToken);
             throw new InvalidOperationException($"Database error on UpdateAsync (Company): {ex.Message}", ex);
         }
         catch (Exception ex)
         {
+            await _errorLogger.LogAsync(nameof(CompanyRepository), nameof(UpdateAsync), ex, cancellationToken);
             throw new InvalidOperationException($"Error on UpdateAsync (Company): {ex.Message}", ex);
         }
     }
@@ -186,10 +197,12 @@ public class CompanyRepository : ICompanyRepository
         }
         catch (MySqlException ex)
         {
+            await _errorLogger.LogAsync(nameof(CompanyRepository), nameof(DeleteAsync), ex, cancellationToken);
             throw new InvalidOperationException($"Database error on DeleteAsync (Company): {ex.Message}", ex);
         }
         catch (Exception ex)
         {
+            await _errorLogger.LogAsync(nameof(CompanyRepository), nameof(DeleteAsync), ex, cancellationToken);
             throw new InvalidOperationException($"Error on DeleteAsync (Company): {ex.Message}", ex);
         }
     }

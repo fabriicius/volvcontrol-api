@@ -3,16 +3,19 @@ using MySqlConnector;
 using volvcontrol_api.domain.Entities;
 using volvcontrol_api.domain.Interfaces.Repository;
 using volvcontrol_api.domain.Model.Request;
+using volvcontrol_api.repository.logging;
 
 namespace volvcontrol_api.repository.repo;
 
 public class UserRepository : IUserRepository
 {
     private readonly string _connectionString;
+    private readonly RepositoryErrorLogger _errorLogger;
 
     public UserRepository(string connectionString)
     {
         _connectionString = connectionString ?? throw new ArgumentNullException(nameof(connectionString));
+        _errorLogger = new RepositoryErrorLogger(_connectionString);
     }
 
     public async Task<User> CreateAsync(UserCreateRequest request, CancellationToken cancellationToken = default)
@@ -66,10 +69,12 @@ public class UserRepository : IUserRepository
         }
         catch (MySqlException ex)
         {
+            await _errorLogger.LogAsync(nameof(UserRepository), nameof(CreateAsync), ex, cancellationToken);
             throw new InvalidOperationException($"Database error on CreateAsync (User): {ex.Message}", ex);
         }
         catch (Exception ex)
         {
+            await _errorLogger.LogAsync(nameof(UserRepository), nameof(CreateAsync), ex, cancellationToken);
             throw new InvalidOperationException($"Error on CreateAsync (User): {ex.Message}", ex);
         }
     }
@@ -85,7 +90,13 @@ public class UserRepository : IUserRepository
         }
         catch (MySqlException ex)
         {
+            await _errorLogger.LogAsync(nameof(UserRepository), nameof(GetByEmailAsync), ex, cancellationToken);
             throw new InvalidOperationException($"Database error on GetByEmailAsync (User): {ex.Message}", ex);
+        }
+        catch (Exception ex)
+        {
+            await _errorLogger.LogAsync(nameof(UserRepository), nameof(GetByEmailAsync), ex, cancellationToken);
+            throw new InvalidOperationException($"Error on GetByEmailAsync (User): {ex.Message}", ex);
         }
     }
 
@@ -108,10 +119,12 @@ public class UserRepository : IUserRepository
         }
         catch (MySqlException ex)
         {
+            await _errorLogger.LogAsync(nameof(UserRepository), nameof(GetByIdAsync), ex, cancellationToken);
             throw new InvalidOperationException($"Database error on GetByIdAsync (User): {ex.Message}", ex);
         }
         catch (Exception ex)
         {
+            await _errorLogger.LogAsync(nameof(UserRepository), nameof(GetByIdAsync), ex, cancellationToken);
             throw new InvalidOperationException($"Error on GetByIdAsync (User): {ex.Message}", ex);
         }
     }
@@ -136,10 +149,12 @@ public class UserRepository : IUserRepository
         }
         catch (MySqlException ex)
         {
+            await _errorLogger.LogAsync(nameof(UserRepository), nameof(GetAllAsync), ex, cancellationToken);
             throw new InvalidOperationException($"Database error on GetAllAsync (User): {ex.Message}", ex);
         }
         catch (Exception ex)
         {
+            await _errorLogger.LogAsync(nameof(UserRepository), nameof(GetAllAsync), ex, cancellationToken);
             throw new InvalidOperationException($"Error on GetAllAsync (User): {ex.Message}", ex);
         }
     }
@@ -195,10 +210,12 @@ public class UserRepository : IUserRepository
         }
         catch (MySqlException ex)
         {
+            await _errorLogger.LogAsync(nameof(UserRepository), nameof(UpdateAsync), ex, cancellationToken);
             throw new InvalidOperationException($"Database error on UpdateAsync (User): {ex.Message}", ex);
         }
         catch (Exception ex)
         {
+            await _errorLogger.LogAsync(nameof(UserRepository), nameof(UpdateAsync), ex, cancellationToken);
             throw new InvalidOperationException($"Error on UpdateAsync (User): {ex.Message}", ex);
         }
     }
@@ -215,7 +232,13 @@ public class UserRepository : IUserRepository
         }
         catch (MySqlException ex)
         {
+            await _errorLogger.LogAsync(nameof(UserRepository), nameof(UpdateEmailAsync), ex, cancellationToken);
             throw new InvalidOperationException($"Database error on UpdateEmailAsync (User): {ex.Message}", ex);
+        }
+        catch (Exception ex)
+        {
+            await _errorLogger.LogAsync(nameof(UserRepository), nameof(UpdateEmailAsync), ex, cancellationToken);
+            throw new InvalidOperationException($"Error on UpdateEmailAsync (User): {ex.Message}", ex);
         }
     }
 
@@ -242,10 +265,12 @@ public class UserRepository : IUserRepository
         }
         catch (MySqlException ex)
         {
+            await _errorLogger.LogAsync(nameof(UserRepository), nameof(DeleteAsync), ex, cancellationToken);
             throw new InvalidOperationException($"Database error on DeleteAsync (User): {ex.Message}", ex);
         }
         catch (Exception ex)
         {
+            await _errorLogger.LogAsync(nameof(UserRepository), nameof(DeleteAsync), ex, cancellationToken);
             throw new InvalidOperationException($"Error on DeleteAsync (User): {ex.Message}", ex);
         }
     }
@@ -270,10 +295,12 @@ public class UserRepository : IUserRepository
         }
         catch (MySqlException ex)
         {
+            await _errorLogger.LogAsync(nameof(UserRepository), nameof(LoginAsync), ex, cancellationToken);
             throw new InvalidOperationException($"Database error on LoginAsync (User): {ex.Message}", ex);
         }
         catch (Exception ex)
         {
+            await _errorLogger.LogAsync(nameof(UserRepository), nameof(LoginAsync), ex, cancellationToken);
             throw new InvalidOperationException($"Error on LoginAsync (User): {ex.Message}", ex);
         }
     }

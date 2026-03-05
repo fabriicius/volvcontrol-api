@@ -9,7 +9,7 @@ namespace volvcontrol_api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize(Policy = AuthConstants.AdmOnlyPolicy)]
+[Authorize]
 public class EquipmentController : ControllerBase
 {
     private readonly IEquipmentService _equipmentService;
@@ -39,6 +39,29 @@ public class EquipmentController : ControllerBase
         if (result is null)
             return NotFound();
         return Ok(result);
+    }
+
+    /// <summary>Lista todos os equipamentos dos clientes cadastrados por um usuário.</summary>
+    [HttpGet("user/{userId:int}")]
+    [ProducesResponseType(typeof(IReadOnlyList<EquipmentResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<IReadOnlyList<EquipmentResponse>>> GetAllByUserId(int userId, CancellationToken cancellationToken)
+    {
+        if (userId <= 0)
+            return BadRequest("userId deve ser maior que zero.");
+
+        var result = await _equipmentService.GetAllByUserIdAsync(userId, cancellationToken);
+        return Ok(result);
+    }
+
+    /// <summary>Lista categorias e tipos de equipamento em um único endpoint.</summary>
+    [HttpGet("lookups")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<ActionResult> GetLookups(CancellationToken cancellationToken)
+    {
+        var categories = await _equipmentService.GetCategoriesAsync(cancellationToken);
+        var types = await _equipmentService.GetTypesAsync(cancellationToken);
+        return Ok(new { categories, types });
     }
 
     /// <summary>Atualiza um equipamento.</summary>

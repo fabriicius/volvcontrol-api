@@ -2,6 +2,7 @@ namespace volvcontrol_api.domain.Model.Request;
 
 public class ClientCreateRequest
 {
+    public int UserId { get; set; }
     public int CompanyId { get; set; }
     public int PlansId { get; set; }
     public int StatusClientId { get; set; }

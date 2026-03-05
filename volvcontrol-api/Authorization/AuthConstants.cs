@@ -5,6 +5,9 @@ namespace volvcontrol_api.Authorization;
 /// </summary>
 public static class AuthConstants
 {
+    /// <summary>Nome do claim no JWT que armazena o id do usuário.</summary>
+    public const string UserIdClaim = "idUser";
+
     /// <summary>Nome do claim no JWT que armazena o cargo/função do usuário.</summary>
     public const string PositionDescriptionClaim = "position_description";
 

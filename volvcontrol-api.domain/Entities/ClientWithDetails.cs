@@ -3,6 +3,7 @@ namespace volvcontrol_api.domain.Entities;
 public class ClientWithDetails
 {
     public int Id { get; set; }
+    public int UserId { get; set; }
     public int PlansId { get; set; }
     public string? PlanDescription { get; set; }
     public int StatusClientId { get; set; }
@@ -14,5 +15,7 @@ public class ClientWithDetails
     public string Notes { get; set; } = string.Empty;
     public DateTime CreatedDate { get; set; }
     public DateTime UpdatedDate { get; set; }
+    public int EquipmentCount { get; set; }
+    public List<ClientEquipmentInfo> Equipments { get; set; } = new();
     public List<Address> Addresses { get; set; } = new();
 }

@@ -27,6 +27,7 @@ public class JwtTokenService
         var claims = new List<Claim>
         {
             new(JwtRegisteredClaimNames.Sub, userId.ToString()),
+            new(AuthConstants.UserIdClaim, userId.ToString()),
             new(JwtRegisteredClaimNames.Email, email),
             new("company", company),
             new("name", name),

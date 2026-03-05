@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace volvcontrol_api.domain.Model.Request;
 
 public class EquipmentUpdateRequest
@@ -6,13 +8,30 @@ public class EquipmentUpdateRequest
     public string Name { get; set; } = string.Empty;
     public int ClientId { get; set; }
     public string QrCode { get; set; } = string.Empty;
-    public long EquipmentCategoryId { get; set; }
-    public long EquipmentTypeId { get; set; }
+    [JsonPropertyName("equipmentCategoryId")]
+    public int EquipmentCategoryId { get; set; }
+    [JsonPropertyName("equipmentTypeId")]
+    public int EquipmentTypeId { get; set; }
+
+    [JsonPropertyName("equipment_category_id")]
+    public int EquipmentCategoryIdSnake { set => EquipmentCategoryId = value; }
+    [JsonPropertyName("equipament_category_id")]
+    public int EquipamentCategoryIdSnake { set => EquipmentCategoryId = value; }
+    [JsonPropertyName("equipamentCategoryId")]
+    public int EquipamentCategoryId { set => EquipmentCategoryId = value; }
+    [JsonPropertyName("equipment_type_id")]
+    public int EquipmentTypeIdSnake { set => EquipmentTypeId = value; }
+    [JsonPropertyName("equipament_type_id")]
+    public int EquipamentTypeIdSnake { set => EquipmentTypeId = value; }
+    [JsonPropertyName("equipamentTypeId")]
+    public int EquipamentTypeId { set => EquipmentTypeId = value; }
+
     public string Brand { get; set; } = string.Empty;
     public string Model { get; set; } = string.Empty;
     public DateOnly? InstallationDate { get; set; }
     public DateOnly? WarrantyUntil { get; set; }
     public int StatusEquipmentId { get; set; }
-    public string PhotoUrl { get; set; } = string.Empty;
+    [JsonPropertyName("imagebase64")]
+    public string ImageBase64 { get; set; } = string.Empty;
     public string Notes { get; set; } = string.Empty;
 }

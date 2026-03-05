@@ -3,16 +3,19 @@ using MySqlConnector;
 using volvcontrol_api.domain.Entities;
 using volvcontrol_api.domain.Interfaces.Repository;
 using volvcontrol_api.domain.Model.Request;
+using volvcontrol_api.repository.logging;
 
 namespace volvcontrol_api.repository.repo;
 
 public class ClientRepository : IClientRepository
 {
     private readonly string _connectionString;
+    private readonly RepositoryErrorLogger _errorLogger;
 
     public ClientRepository(string connectionString)
     {
         _connectionString = connectionString ?? throw new ArgumentNullException(nameof(connectionString));
+        _errorLogger = new RepositoryErrorLogger(_connectionString);
     }
 
     public async Task<Client> CreateAsync(ClientCreateRequest request, CancellationToken cancellationToken = default)
@@ -25,12 +28,13 @@ public class ClientRepository : IClientRepository
             var now = DateTime.UtcNow;
 
             const string sqlClient = @"
-            INSERT INTO client (plans_id, status_client_id, name, document, email, phone, notes, created_date, updated_date)
-            VALUES (@PlansId, @StatusClientId, @Name, @Document, @Email, @Phone, @Notes, @CreatedDate, @UpdatedDate);
+            INSERT INTO client (user_id, plans_id, status_client_id, name, document, email, phone, notes, created_date, updated_date)
+            VALUES (@UserId, @PlansId, @StatusClientId, @Name, @Document, @Email, @Phone, @Notes, @CreatedDate, @UpdatedDate);
             SELECT CAST(LAST_INSERT_ID() AS SIGNED);";
 
             var paramClient = new
             {
+                request.UserId,
                 request.PlansId,
                 request.StatusClientId,
                 request.Name,
@@ -76,6 +80,7 @@ public class ClientRepository : IClientRepository
             return new Client
             {
                 Id = clientId,
+                UserId = request.UserId,
                 PlansId = request.PlansId,
                 StatusClientId = request.StatusClientId,
                 Name = request.Name,
@@ -90,11 +95,13 @@ public class ClientRepository : IClientRepository
         catch (MySqlException ex)
         {
             await transaction.RollbackAsync(cancellationToken);
+            await _errorLogger.LogAsync(nameof(ClientRepository), nameof(CreateAsync), ex, cancellationToken);
             throw new InvalidOperationException($"Database error on CreateAsync (Client): {ex.Message}", ex);
         }
         catch (Exception ex)
         {
             await transaction.RollbackAsync(cancellationToken);
+            await _errorLogger.LogAsync(nameof(ClientRepository), nameof(CreateAsync), ex, cancellationToken);
             throw new InvalidOperationException($"Error on CreateAsync (Client): {ex.Message}", ex);
         }
     }
@@ -200,7 +207,7 @@ public class ClientRepository : IClientRepository
             await transaction.CommitAsync(cancellationToken);
 
             const string sqlSelect = @"
-            SELECT id AS Id, plans_id AS PlansId, status_client_id AS StatusClientId, name AS Name,
+            SELECT id AS Id, user_id AS UserId, plans_id AS PlansId, status_client_id AS StatusClientId, name AS Name,
                    document AS Document, email AS Email, phone AS Phone, notes AS Notes,
                    created_date AS CreatedDate, updated_date AS UpdatedDate
             FROM client WHERE id = @Id";
@@ -209,11 +216,13 @@ public class ClientRepository : IClientRepository
         catch (MySqlException ex)
         {
             await transaction.RollbackAsync(cancellationToken);
+            await _errorLogger.LogAsync(nameof(ClientRepository), nameof(UpdateAsync), ex, cancellationToken);
             throw new InvalidOperationException($"Database error on UpdateAsync (Client): {ex.Message}", ex);
         }
         catch (Exception ex)
         {
             await transaction.RollbackAsync(cancellationToken);
+            await _errorLogger.LogAsync(nameof(ClientRepository), nameof(UpdateAsync), ex, cancellationToken);
             throw new InvalidOperationException($"Error on UpdateAsync (Client): {ex.Message}", ex);
         }
     }
@@ -222,7 +231,7 @@ public class ClientRepository : IClientRepository
     {
         try
         {
-            const string sql = @"SELECT id AS Id, plans_id AS PlansId, status_client_id AS StatusClientId, name AS Name,
+            const string sql = @"SELECT id AS Id, user_id AS UserId, plans_id AS PlansId, status_client_id AS StatusClientId, name AS Name,
                 document AS Document, email AS Email, phone AS Phone, notes AS Notes, created_date AS CreatedDate, updated_date AS UpdatedDate
                 FROM client WHERE email = @Email LIMIT 1";
             await using var conn = new MySqlConnection(_connectionString);
@@ -231,7 +240,13 @@ public class ClientRepository : IClientRepository
         }
         catch (MySqlException ex)
         {
+            await _errorLogger.LogAsync(nameof(ClientRepository), nameof(GetByEmailAsync), ex, cancellationToken);
             throw new InvalidOperationException($"Database error on GetByEmailAsync (Client): {ex.Message}", ex);
+        }
+        catch (Exception ex)
+        {
+            await _errorLogger.LogAsync(nameof(ClientRepository), nameof(GetByEmailAsync), ex, cancellationToken);
+            throw new InvalidOperationException($"Error on GetByEmailAsync (Client): {ex.Message}", ex);
         }
     }
 
@@ -239,7 +254,7 @@ public class ClientRepository : IClientRepository
     {
         try
         {
-            const string sql = @"SELECT id AS Id, plans_id AS PlansId, status_client_id AS StatusClientId, name AS Name,
+            const string sql = @"SELECT id AS Id, user_id AS UserId, plans_id AS PlansId, status_client_id AS StatusClientId, name AS Name,
                 document AS Document, email AS Email, phone AS Phone, notes AS Notes, created_date AS CreatedDate, updated_date AS UpdatedDate
                 FROM client WHERE document = @Document LIMIT 1";
             await using var conn = new MySqlConnection(_connectionString);
@@ -248,7 +263,13 @@ public class ClientRepository : IClientRepository
         }
         catch (MySqlException ex)
         {
+            await _errorLogger.LogAsync(nameof(ClientRepository), nameof(GetByDocumentAsync), ex, cancellationToken);
             throw new InvalidOperationException($"Database error on GetByDocumentAsync (Client): {ex.Message}", ex);
+        }
+        catch (Exception ex)
+        {
+            await _errorLogger.LogAsync(nameof(ClientRepository), nameof(GetByDocumentAsync), ex, cancellationToken);
+            throw new InvalidOperationException($"Error on GetByDocumentAsync (Client): {ex.Message}", ex);
         }
     }
 
@@ -256,7 +277,7 @@ public class ClientRepository : IClientRepository
     {
         try
         {
-            const string sql = @"SELECT id AS Id, plans_id AS PlansId, status_client_id AS StatusClientId, name AS Name,
+            const string sql = @"SELECT id AS Id, user_id AS UserId, plans_id AS PlansId, status_client_id AS StatusClientId, name AS Name,
                 document AS Document, email AS Email, phone AS Phone, notes AS Notes, created_date AS CreatedDate, updated_date AS UpdatedDate
                 FROM client WHERE email = @Email AND id != @ExcludeClientId LIMIT 1";
             await using var conn = new MySqlConnection(_connectionString);
@@ -265,7 +286,13 @@ public class ClientRepository : IClientRepository
         }
         catch (MySqlException ex)
         {
+            await _errorLogger.LogAsync(nameof(ClientRepository), nameof(GetAnotherClientByEmailAsync), ex, cancellationToken);
             throw new InvalidOperationException($"Database error on GetAnotherClientByEmailAsync (Client): {ex.Message}", ex);
+        }
+        catch (Exception ex)
+        {
+            await _errorLogger.LogAsync(nameof(ClientRepository), nameof(GetAnotherClientByEmailAsync), ex, cancellationToken);
+            throw new InvalidOperationException($"Error on GetAnotherClientByEmailAsync (Client): {ex.Message}", ex);
         }
     }
 
@@ -273,7 +300,7 @@ public class ClientRepository : IClientRepository
     {
         try
         {
-            const string sql = @"SELECT id AS Id, plans_id AS PlansId, status_client_id AS StatusClientId, name AS Name,
+            const string sql = @"SELECT id AS Id, user_id AS UserId, plans_id AS PlansId, status_client_id AS StatusClientId, name AS Name,
                 document AS Document, email AS Email, phone AS Phone, notes AS Notes, created_date AS CreatedDate, updated_date AS UpdatedDate
                 FROM client WHERE document = @Document AND id != @ExcludeClientId LIMIT 1";
             await using var conn = new MySqlConnection(_connectionString);
@@ -282,7 +309,13 @@ public class ClientRepository : IClientRepository
         }
         catch (MySqlException ex)
         {
+            await _errorLogger.LogAsync(nameof(ClientRepository), nameof(GetAnotherClientByDocumentAsync), ex, cancellationToken);
             throw new InvalidOperationException($"Database error on GetAnotherClientByDocumentAsync (Client): {ex.Message}", ex);
+        }
+        catch (Exception ex)
+        {
+            await _errorLogger.LogAsync(nameof(ClientRepository), nameof(GetAnotherClientByDocumentAsync), ex, cancellationToken);
+            throw new InvalidOperationException($"Error on GetAnotherClientByDocumentAsync (Client): {ex.Message}", ex);
         }
     }
 
@@ -301,10 +334,17 @@ public class ClientRepository : IClientRepository
             await transaction.CommitAsync(cancellationToken);
             return rows > 0;
         }
-        catch
+        catch (MySqlException ex)
         {
             await transaction.RollbackAsync(cancellationToken);
-            throw;
+            await _errorLogger.LogAsync(nameof(ClientRepository), nameof(DeleteAsync), ex, cancellationToken);
+            throw new InvalidOperationException($"Database error on DeleteAsync (Client): {ex.Message}", ex);
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync(cancellationToken);
+            await _errorLogger.LogAsync(nameof(ClientRepository), nameof(DeleteAsync), ex, cancellationToken);
+            throw new InvalidOperationException($"Error on DeleteAsync (Client): {ex.Message}", ex);
         }
     }
 
@@ -316,7 +356,7 @@ public class ClientRepository : IClientRepository
             await conn.OpenAsync(cancellationToken);
 
             const string sqlClient = @"
-            SELECT c.id AS Id, c.plans_id AS PlansId, c.status_client_id AS StatusClientId,
+            SELECT c.id AS Id, c.user_id AS UserId, c.plans_id AS PlansId, c.status_client_id AS StatusClientId,
                    p.description AS PlanDescription, s.description AS StatusClientDescription,
                    c.name AS Name, c.document AS Document, c.email AS Email, c.phone AS Phone, c.notes AS Notes,
                    c.created_date AS CreatedDate, c.updated_date AS UpdatedDate
@@ -340,14 +380,32 @@ public class ClientRepository : IClientRepository
             var addresses = (await conn.QueryAsync<Address>(new CommandDefinition(sqlAddresses, new { ClientId = id }, cancellationToken: cancellationToken))).ToList();
             client.Addresses = addresses;
 
+            const string sqlEquipments = @"
+            SELECT e.name AS Name,
+                   e.qr_code AS QrCode,
+                   CASE
+                       WHEN e.status_equipment_id = 1 THEN 'Ativo'
+                       ELSE 'Inativo'
+                   END AS Status
+            FROM client c
+            INNER JOIN equipment e ON e.client_id = c.id
+            WHERE c.id = @ClientId
+            ORDER BY e.id DESC";
+
+            var equipments = (await conn.QueryAsync<ClientEquipmentInfo>(new CommandDefinition(sqlEquipments, new { ClientId = id }, cancellationToken: cancellationToken))).ToList();
+            client.Equipments = equipments;
+            client.EquipmentCount = equipments.Count;
+
             return client;
         }
         catch (MySqlException ex)
         {
+            await _errorLogger.LogAsync(nameof(ClientRepository), nameof(GetByIdWithDetailsAsync), ex, cancellationToken);
             throw new InvalidOperationException($"Database error on GetByIdWithDetailsAsync (Client): {ex.Message}", ex);
         }
         catch (Exception ex)
         {
+            await _errorLogger.LogAsync(nameof(ClientRepository), nameof(GetByIdWithDetailsAsync), ex, cancellationToken);
             throw new InvalidOperationException($"Error on GetByIdWithDetailsAsync (Client): {ex.Message}", ex);
         }
     }
@@ -384,10 +442,12 @@ public class ClientRepository : IClientRepository
         }
         catch (MySqlException ex)
         {
+            await _errorLogger.LogAsync(nameof(ClientRepository), nameof(GetPagedAsync), ex, cancellationToken);
             throw new InvalidOperationException($"Database error on GetPagedAsync (Client): {ex.Message}", ex);
         }
         catch (Exception ex)
         {
+            await _errorLogger.LogAsync(nameof(ClientRepository), nameof(GetPagedAsync), ex, cancellationToken);
             throw new InvalidOperationException($"Error on GetPagedAsync (Client): {ex.Message}", ex);
         }
     }
@@ -447,11 +507,13 @@ public class ClientRepository : IClientRepository
         catch (MySqlException ex)
         {
             await transaction.RollbackAsync(cancellationToken);
+            await _errorLogger.LogAsync(nameof(ClientRepository), nameof(CreateAddressForClientAsync), ex, cancellationToken);
             throw new InvalidOperationException($"Database error on CreateAddressForClientAsync: {ex.Message}", ex);
         }
         catch (Exception ex)
         {
             await transaction.RollbackAsync(cancellationToken);
+            await _errorLogger.LogAsync(nameof(ClientRepository), nameof(CreateAddressForClientAsync), ex, cancellationToken);
             throw new InvalidOperationException($"Error on CreateAddressForClientAsync: {ex.Message}", ex);
         }
     }
@@ -468,7 +530,13 @@ public class ClientRepository : IClientRepository
         }
         catch (MySqlException ex)
         {
+            await _errorLogger.LogAsync(nameof(ClientRepository), nameof(GetPlansAsync), ex, cancellationToken);
             throw new InvalidOperationException($"Database error on GetPlansAsync: {ex.Message}", ex);
+        }
+        catch (Exception ex)
+        {
+            await _errorLogger.LogAsync(nameof(ClientRepository), nameof(GetPlansAsync), ex, cancellationToken);
+            throw new InvalidOperationException($"Error on GetPlansAsync: {ex.Message}", ex);
         }
     }
 
@@ -484,7 +552,13 @@ public class ClientRepository : IClientRepository
         }
         catch (MySqlException ex)
         {
+            await _errorLogger.LogAsync(nameof(ClientRepository), nameof(GetStatusClientsAsync), ex, cancellationToken);
             throw new InvalidOperationException($"Database error on GetStatusClientsAsync: {ex.Message}", ex);
+        }
+        catch (Exception ex)
+        {
+            await _errorLogger.LogAsync(nameof(ClientRepository), nameof(GetStatusClientsAsync), ex, cancellationToken);
+            throw new InvalidOperationException($"Error on GetStatusClientsAsync: {ex.Message}", ex);
         }
     }
 }

@@ -6,6 +6,7 @@ using Microsoft.OpenApi.Models;
 using volvcontrol_api.Authorization;
 using volvcontrol_api.domain.Interfaces.Repository;
 using volvcontrol_api.domain.Interfaces.Service;
+using volvcontrol_api.Middlewares;
 using volvcontrol_api.repository.repo;
 using volvcontrol_api.service.services;
 using volvcontrol_api.service.firebase;
@@ -120,6 +121,8 @@ if (!app.Environment.IsDevelopment())
 {
     app.UseHttpsRedirection();
 }
+
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.UseCors();
 

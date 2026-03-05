@@ -1,14 +1,14 @@
 {
   "name": "Bomba Centrífuga 01",
-  "clientId": 1,
+  "clientId": 30,
   "qrCode": "EQ-2025-001",
-  "categoryDescription": "Bomba",
-  "typeDescription": "Centrífuga",
+  "equipmentCategoryId": 5,
+  "equipmentTypeId": 5,
   "brand": "Schneider",
   "model": "PCX-150",
   "installationDate": "2025-01-15",
   "warrantyUntil": "2027-01-15",
   "statusEquipmentId": 1,
-  "photoUrl": "",
+  "imagebase64": null,
   "notes": "Equipamento instalado no setor de produção."
 }

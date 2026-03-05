@@ -6,8 +6,8 @@ public class EquipmentRow
     public string? Name { get; set; }
     public int ClientId { get; set; }
     public string? QrCode { get; set; }
-    public long EquipmentCategoryId { get; set; }
-    public long EquipmentTypeId { get; set; }
+    public int EquipmentCategoryId { get; set; }
+    public int EquipmentTypeId { get; set; }
     public string? CategoryDescription { get; set; }
     public string? TypeDescription { get; set; }
     public string? Brand { get; set; }
@@ -15,6 +15,7 @@ public class EquipmentRow
     public DateTime? InstallationDate { get; set; }
     public DateTime? WarrantyUntil { get; set; }
     public int StatusEquipmentId { get; set; }
+    public string? StatusEquipmentDescription { get; set; }
     public string? PhotoUrl { get; set; }
     public string? Notes { get; set; }
     public DateTime CreatedDate { get; set; }

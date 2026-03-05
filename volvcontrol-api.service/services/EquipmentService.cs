@@ -20,14 +20,32 @@ public class EquipmentService : IEquipmentService
 
     public async Task<EquipmentResponse> CreateAsync(EquipmentCreateRequest request, CancellationToken cancellationToken = default)
     {
-        var photoUrl = await TryUploadBase64ImageAsync(request, cancellationToken);
+        if (request.EquipmentCategoryId <= 0 || request.EquipmentTypeId <= 0)
+            throw new ArgumentException("equipmentCategoryId e equipmentTypeId são obrigatórios e devem ser maiores que zero.");
+
+        var photoUrl = await TryUploadBase64ImageAsync(request.ImageBase64, request.ClientId, cancellationToken);
         var entity = await _repository.CreateAsync(request, photoUrl, cancellationToken);
         return ToResponse(entity);
     }
 
     public async Task<EquipmentResponse?> UpdateAsync(EquipmentUpdateRequest request, CancellationToken cancellationToken = default)
     {
-        var entity = await _repository.UpdateAsync(request, cancellationToken);
+        if (request.EquipmentCategoryId <= 0 || request.EquipmentTypeId <= 0)
+            throw new ArgumentException("equipmentCategoryId e equipmentTypeId são obrigatórios e devem ser maiores que zero.");
+        if (string.IsNullOrWhiteSpace(request.ImageBase64))
+            throw new ArgumentException("imagebase64 é obrigatório no update do equipamento.");
+
+        var current = await _repository.GetByIdAsync(request.Id, cancellationToken);
+        if (current is null)
+            return null;
+
+        var photoUrl = await TryUploadBase64ImageAsync(request.ImageBase64, request.ClientId, cancellationToken);
+
+        var oldObjectName = ExtractObjectNameFromPhotoUrl(current.PhotoUrl);
+        if (!string.IsNullOrWhiteSpace(oldObjectName))
+            await _photoStorage.DeleteAsync(oldObjectName, cancellationToken);
+
+        var entity = await _repository.UpdateAsync(request, photoUrl, cancellationToken);
         if (entity is null)
             return null;
         var updated = await _repository.GetByIdAsync(entity.Id, cancellationToken);
@@ -45,9 +63,38 @@ public class EquipmentService : IEquipmentService
         return response;
     }
 
+    public async Task<IReadOnlyList<EquipmentResponse>> GetAllByUserIdAsync(int userId, CancellationToken cancellationToken = default)
+    {
+        if (userId <= 0)
+            throw new ArgumentException("userId deve ser maior que zero.");
+
+        var entities = await _repository.GetAllByUserIdAsync(userId, cancellationToken);
+        return entities.Select(ToResponse).ToList();
+    }
+
     public async Task<bool> DeleteAsync(int id, CancellationToken cancellationToken = default)
     {
         return await _repository.DeleteAsync(id, cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<EquipmentCategoryResponse>> GetCategoriesAsync(CancellationToken cancellationToken = default)
+    {
+        var entities = await _repository.GetCategoriesAsync(cancellationToken);
+        return entities.Select(c => new EquipmentCategoryResponse
+        {
+            Id = c.Id,
+            Description = c.Description
+        }).ToList();
+    }
+
+    public async Task<IReadOnlyList<EquipmentTypeResponse>> GetTypesAsync(CancellationToken cancellationToken = default)
+    {
+        var entities = await _repository.GetTypesAsync(cancellationToken);
+        return entities.Select(t => new EquipmentTypeResponse
+        {
+            Id = t.Id,
+            Description = t.Description
+        }).ToList();
     }
 
     private static EquipmentResponse ToResponse(Equipment entity)
@@ -67,6 +114,7 @@ public class EquipmentService : IEquipmentService
             InstallationDate = entity.InstallationDate,
             WarrantyUntil = entity.WarrantyUntil,
             StatusEquipmentId = entity.StatusEquipmentId,
+            StatusEquipmentDescription = entity.StatusEquipmentDescription ?? string.Empty,
             PhotoUrl = entity.PhotoUrl,
             ImageBase64 = string.Empty,
             Notes = entity.Notes,
@@ -75,12 +123,12 @@ public class EquipmentService : IEquipmentService
         };
     }
 
-    private async Task<string> TryUploadBase64ImageAsync(EquipmentCreateRequest request, CancellationToken cancellationToken)
+    private async Task<string> TryUploadBase64ImageAsync(string imageBase64, int clientId, CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(request.ImageBase64))
+        if (string.IsNullOrWhiteSpace(imageBase64))
             return string.Empty;
 
-        var (bytes, contentType, extension) = ParseBase64Image(request.ImageBase64);
+        var (bytes, contentType, extension) = ParseBase64Image(imageBase64);
         await using var content = new MemoryStream(bytes);
         var fileName = $"equipment-{Guid.NewGuid():N}{extension}";
 
@@ -91,7 +139,7 @@ public class EquipmentService : IEquipmentService
             cancellationToken,
             "VolvControl",
             "Equipamento",
-            request.ClientId.ToString());
+            clientId.ToString());
 
         return _photoStorage.GetPermanentUrl(objectName);
     }

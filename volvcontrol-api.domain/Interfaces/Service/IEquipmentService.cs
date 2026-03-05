@@ -8,5 +8,8 @@ public interface IEquipmentService
     Task<EquipmentResponse> CreateAsync(EquipmentCreateRequest request, CancellationToken cancellationToken = default);
     Task<EquipmentResponse?> UpdateAsync(EquipmentUpdateRequest request, CancellationToken cancellationToken = default);
     Task<EquipmentResponse?> GetByIdAsync(int id, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<EquipmentResponse>> GetAllByUserIdAsync(int userId, CancellationToken cancellationToken = default);
     Task<bool> DeleteAsync(int id, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<EquipmentCategoryResponse>> GetCategoriesAsync(CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<EquipmentTypeResponse>> GetTypesAsync(CancellationToken cancellationToken = default);
 }

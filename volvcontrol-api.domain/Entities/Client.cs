@@ -3,6 +3,7 @@ namespace volvcontrol_api.domain.Entities;
 public class Client
 {
     public int Id { get; set; }
+    public int UserId { get; set; }
     public int PlansId { get; set; }
     public int StatusClientId { get; set; }
     public string Name { get; set; } = string.Empty;

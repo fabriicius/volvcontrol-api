@@ -3,6 +3,7 @@ namespace volvcontrol_api.domain.Model.Response;
 public class ClientDetailResponse
 {
     public int Id { get; set; }
+    public int UserId { get; set; }
     public int PlansId { get; set; }
     public string PlanDescription { get; set; } = string.Empty;
     public int StatusClientId { get; set; }
@@ -14,5 +15,7 @@ public class ClientDetailResponse
     public string Notes { get; set; } = string.Empty;
     public DateTime CreatedDate { get; set; }
     public DateTime UpdatedDate { get; set; }
+    public int EquipmentCount { get; set; }
+    public List<ClientEquipmentResponse> Equipments { get; set; } = new();
     public List<AddressResponse> Addresses { get; set; } = new();
 }

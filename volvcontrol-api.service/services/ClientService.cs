@@ -22,6 +22,9 @@ public class ClientService : IClientService
 
     public async Task<ClientResponse> CreateAsync(ClientCreateRequest request, CancellationToken cancellationToken = default)
     {
+        if (request.UserId <= 0)
+            throw new ArgumentException("userId é obrigatório e deve ser maior que zero.");
+
         if (await _clientRepository.GetByEmailAsync(request.Email, cancellationToken) != null)
             throw new ConflictException("Email já cadastrado para um cliente.");
 
@@ -110,6 +113,7 @@ public class ClientService : IClientService
         return new ClientDetailResponse
         {
             Id = entity.Id,
+            UserId = entity.UserId,
             PlansId = entity.PlansId,
             PlanDescription = entity.PlanDescription ?? string.Empty,
             StatusClientId = entity.StatusClientId,
@@ -121,6 +125,13 @@ public class ClientService : IClientService
             Notes = entity.Notes,
             CreatedDate = entity.CreatedDate,
             UpdatedDate = entity.UpdatedDate,
+            EquipmentCount = entity.EquipmentCount,
+            Equipments = entity.Equipments.Select(e => new ClientEquipmentResponse
+            {
+                Name = e.Name,
+                QrCode = e.QrCode,
+                Status = e.Status
+            }).ToList(),
             Addresses = entity.Addresses.Select(a => new AddressResponse
             {
                 Id = a.Id,
@@ -143,6 +154,7 @@ public class ClientService : IClientService
         return new ClientResponse
         {
             Id = entity.Id,
+            UserId = entity.UserId,
             PlansId = entity.PlansId,
             StatusClientId = entity.StatusClientId,
             Name = entity.Name,

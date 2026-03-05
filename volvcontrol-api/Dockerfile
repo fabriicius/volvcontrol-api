@@ -19,4 +19,10 @@ RUN dotnet publish "volvcontrol-api.csproj" -c Release -o /app/publish /p:UseApp
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+
+# Firebase credentials inside container
+RUN mkdir -p /app/token
+COPY ["volvcontrol-api.service/FirebaseCredentials/volvcontrol-ebe86-b99e62524b19.json", "/app/token/volvcontrol-ebe86-b99e62524b19.json"]
+ENV Firebase__CredentialsPath=/app/token/volvcontrol-ebe86-b99e62524b19.json
+
 ENTRYPOINT ["dotnet", "volvcontrol-api.dll"]

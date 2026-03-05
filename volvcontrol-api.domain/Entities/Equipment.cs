@@ -6,8 +6,8 @@ public class Equipment
     public string Name { get; set; } = string.Empty;
     public int ClientId { get; set; }
     public string QrCode { get; set; } = string.Empty;
-    public long EquipmentCategoryId { get; set; }
-    public long EquipmentTypeId { get; set; }
+    public int EquipmentCategoryId { get; set; }
+    public int EquipmentTypeId { get; set; }
     public string Brand { get; set; } = string.Empty;
     public string Model { get; set; } = string.Empty;
     public DateOnly? InstallationDate { get; set; }
@@ -20,6 +20,7 @@ public class Equipment
 
     public string? CategoryDescription { get; set; }
     public string? TypeDescription { get; set; }
+    public string? StatusEquipmentDescription { get; set; }
 
     public Client? Client { get; set; }
     public StatusEquipment? StatusEquipment { get; set; }
