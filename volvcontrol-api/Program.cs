@@ -30,6 +30,9 @@ builder.Services.AddScoped<IClientService, ClientService>();
 builder.Services.AddScoped<IEquipmentRepository>(_ => new EquipmentRepository(connectionString));
 builder.Services.AddScoped<IEquipmentService, EquipmentService>();
 
+builder.Services.AddScoped<IServiceRequestRepository>(_ => new ServiceRequestRepository(connectionString));
+builder.Services.AddScoped<IServiceRequestService, ServiceRequestService>();
+
 builder.Services.AddScoped<IImageRepository>(_ => new ImageRepository(connectionString));
 builder.Services.AddScoped<IImageService, ImageService>();
 

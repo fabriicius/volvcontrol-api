@@ -1,6 +1,6 @@
-namespace volvcontrol_api.repository.Entities;
+namespace volvcontrol_api.domain.Entities;
 
-public class ServiceRequest
+public class ServiceRequestDetail
 {
     public int Id { get; set; }
     public int ClientId { get; set; }
@@ -19,9 +19,12 @@ public class ServiceRequest
     public DateTime CreatedDate { get; set; }
     public DateTime UpdatedDate { get; set; }
 
-    public Client Client { get; set; }
-    public Equipment Equipment { get; set; }
-    public User User { get; set; }
-    public StatusServiceRequest StatusServiceRequest { get; set; }
-    public TypeMaintenanceRecord TypeMaintenanceRecord { get; set; }
+    public string ClientName { get; set; } = string.Empty;
+    public string ClientDocument { get; set; } = string.Empty;
+    public string StatusServiceRequestDescription { get; set; } = string.Empty;
+    public string TypeMaintenanceRecordDescription { get; set; } = string.Empty;
+    public string EquipmentName { get; set; } = string.Empty;
+    public string EquipmentQrCode { get; set; } = string.Empty;
+    public string UserName { get; set; } = string.Empty;
+    public string UserEmail { get; set; } = string.Empty;
 }

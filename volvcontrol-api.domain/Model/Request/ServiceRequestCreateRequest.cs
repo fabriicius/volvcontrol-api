@@ -1,8 +1,7 @@
-namespace volvcontrol_api.repository.Entities;
+namespace volvcontrol_api.domain.Model.Request;
 
-public class ServiceRequest
+public class ServiceRequestCreateRequest
 {
-    public int Id { get; set; }
     public int ClientId { get; set; }
     public int EquipmentId { get; set; }
     public int UserId { get; set; }
@@ -16,12 +15,4 @@ public class ServiceRequest
     public string AssignedTechnician { get; set; } = string.Empty;
     public DateOnly? CompletionDate { get; set; }
     public string Notes { get; set; } = string.Empty;
-    public DateTime CreatedDate { get; set; }
-    public DateTime UpdatedDate { get; set; }
-
-    public Client Client { get; set; }
-    public Equipment Equipment { get; set; }
-    public User User { get; set; }
-    public StatusServiceRequest StatusServiceRequest { get; set; }
-    public TypeMaintenanceRecord TypeMaintenanceRecord { get; set; }
 }
