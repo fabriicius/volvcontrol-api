@@ -244,7 +244,7 @@ public class ServiceRequestRepository : IServiceRequestRepository
         }
     }
 
-    public async Task<IReadOnlyList<TypeMaintenanceRecord>> GetTypeMaintenanceRecordsAsync(CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<ServiceTypeMaintenanceRecord>> GetServiceTypeMaintenanceRecordsAsync(CancellationToken cancellationToken = default)
     {
         try
         {
@@ -255,18 +255,18 @@ public class ServiceRequestRepository : IServiceRequestRepository
 
             await using var conn = new MySqlConnection(_connectionString);
             await conn.OpenAsync(cancellationToken);
-            var list = await conn.QueryAsync<TypeMaintenanceRecord>(new CommandDefinition(sql, cancellationToken: cancellationToken));
+            var list = await conn.QueryAsync<ServiceTypeMaintenanceRecord>(new CommandDefinition(sql, cancellationToken: cancellationToken));
             return list.ToList();
         }
         catch (MySqlException ex)
         {
-            await _errorLogger.LogAsync(nameof(ServiceRequestRepository), nameof(GetTypeMaintenanceRecordsAsync), ex, cancellationToken);
-            throw new InvalidOperationException($"Database error on GetTypeMaintenanceRecordsAsync (ServiceRequest): {ex.Message}", ex);
+            await _errorLogger.LogAsync(nameof(ServiceRequestRepository), nameof(GetServiceTypeMaintenanceRecordsAsync), ex, cancellationToken);
+            throw new InvalidOperationException($"Database error on GetServiceTypeMaintenanceRecordsAsync (ServiceRequest): {ex.Message}", ex);
         }
         catch (Exception ex)
         {
-            await _errorLogger.LogAsync(nameof(ServiceRequestRepository), nameof(GetTypeMaintenanceRecordsAsync), ex, cancellationToken);
-            throw new InvalidOperationException($"Error on GetTypeMaintenanceRecordsAsync (ServiceRequest): {ex.Message}", ex);
+            await _errorLogger.LogAsync(nameof(ServiceRequestRepository), nameof(GetServiceTypeMaintenanceRecordsAsync), ex, cancellationToken);
+            throw new InvalidOperationException($"Error on GetServiceTypeMaintenanceRecordsAsync (ServiceRequest): {ex.Message}", ex);
         }
     }
 

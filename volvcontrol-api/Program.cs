@@ -33,6 +33,12 @@ builder.Services.AddScoped<IEquipmentService, EquipmentService>();
 builder.Services.AddScoped<IServiceRequestRepository>(_ => new ServiceRequestRepository(connectionString));
 builder.Services.AddScoped<IServiceRequestService, ServiceRequestService>();
 
+builder.Services.AddScoped<IMaintenanceRecordRepository>(_ => new MaintenanceRecordRepository(connectionString));
+builder.Services.AddScoped<IMaintenanceRecordService, MaintenanceRecordService>();
+
+builder.Services.AddScoped<IDashboardRepository>(_ => new DashboardRepository(connectionString));
+builder.Services.AddScoped<IDashboardService, DashboardService>();
+
 builder.Services.AddScoped<IImageRepository>(_ => new ImageRepository(connectionString));
 builder.Services.AddScoped<IImageService, ImageService>();
 

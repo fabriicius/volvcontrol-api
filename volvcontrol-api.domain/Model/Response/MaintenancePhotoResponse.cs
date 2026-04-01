@@ -1,11 +1,9 @@
-namespace volvcontrol_api.repository.Entities;
+namespace volvcontrol_api.domain.Model.Response;
 
-public class PhotosMaintenance
+public class MaintenancePhotoResponse
 {
     public int Id { get; set; }
     public string Url { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public string PhotoMoment { get; set; } = string.Empty;
-    public DateTime CreatedDate { get; set; }
-    public DateTime UpdatedDate { get; set; }
 }

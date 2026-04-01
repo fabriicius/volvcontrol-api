@@ -89,10 +89,10 @@ public class ServiceRequestService : IServiceRequestService
         }).ToList();
     }
 
-    public async Task<IReadOnlyList<TypeMaintenanceRecordResponse>> GetTypeMaintenanceRecordsAsync(CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<ServiceTypeMaintenanceRecordResponse>> GetServiceTypeMaintenanceRecordsAsync(CancellationToken cancellationToken = default)
     {
-        var entities = await _repository.GetTypeMaintenanceRecordsAsync(cancellationToken);
-        return entities.Select(t => new TypeMaintenanceRecordResponse
+        var entities = await _repository.GetServiceTypeMaintenanceRecordsAsync(cancellationToken);
+        return entities.Select(t => new ServiceTypeMaintenanceRecordResponse
         {
             Id = t.Id,
             Description = t.Description

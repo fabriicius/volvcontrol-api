@@ -9,6 +9,6 @@ public interface IServiceRequestRepository
     Task<ServiceRequestDetail?> GetByIdAsync(int id, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<ServiceRequestListItem>> GetAllByUserIdAsync(int userId, CancellationToken cancellationToken = default);
     Task<bool> ExistsByRequestNumberAsync(string requestNumber, CancellationToken cancellationToken = default);
-    Task<IReadOnlyList<TypeMaintenanceRecord>> GetTypeMaintenanceRecordsAsync(CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<ServiceTypeMaintenanceRecord>> GetServiceTypeMaintenanceRecordsAsync(CancellationToken cancellationToken = default);
     Task<IReadOnlyList<StatusServiceRequest>> GetStatusServiceRequestsAsync(CancellationToken cancellationToken = default);
 }

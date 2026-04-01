@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
+using volvcontrol_api.Authorization;
 using volvcontrol_api.domain.Interfaces.Service;
 using volvcontrol_api.domain.Model.Request;
 using volvcontrol_api.domain.Model.Response;
@@ -31,15 +33,24 @@ public class ServiceRequestController : ControllerBase
     }
 
     /// <summary>Lista os atendimentos com cliente, status e tipo.</summary>
-    [HttpGet("user/{userId:int}")]
+    [HttpGet("lockup")]
     [ProducesResponseType(typeof(IReadOnlyList<ServiceRequestListResponse>), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<IReadOnlyList<ServiceRequestListResponse>>> GetAllByUserId(int userId, CancellationToken cancellationToken)
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<ActionResult<IReadOnlyList<ServiceRequestListResponse>>> GetAllByUserId(CancellationToken cancellationToken)
     {
-        if (userId <= 0)
-            return BadRequest("userId deve ser maior que zero.");
+        if (!TryGetUserIdFromToken(out var userId))
+            return Unauthorized("Token inválido: claim de usuário não encontrada.");
 
         var result = await _serviceRequestService.GetAllByUserIdAsync(userId, cancellationToken);
+        return Ok(result);
+    }
+
+    /// <summary>Lista os tipos de atendimento.</summary>
+    [HttpGet("service-types")]
+    [ProducesResponseType(typeof(IReadOnlyList<ServiceTypeMaintenanceRecordResponse>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<IReadOnlyList<ServiceTypeMaintenanceRecordResponse>>> GetServiceTypes(CancellationToken cancellationToken)
+    {
+        var result = await _serviceRequestService.GetServiceTypeMaintenanceRecordsAsync(cancellationToken);
         return Ok(result);
     }
 
@@ -53,13 +64,13 @@ public class ServiceRequestController : ControllerBase
         return StatusCode(StatusCodes.Status201Created, result);
     }
 
-    /// <summary>Lista tipos e status de atendimento em um único endpoint.</summary>
-    [HttpGet("lookups")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<ActionResult> GetLookups(CancellationToken cancellationToken)
+    private bool TryGetUserIdFromToken(out int userId)
     {
-        var typesMaintenanceRecord = await _serviceRequestService.GetTypeMaintenanceRecordsAsync(cancellationToken);
-        var status = await _serviceRequestService.GetStatusServiceRequestsAsync(cancellationToken);
-        return Ok(new { typesMaintenanceRecord, status });
+        var userIdClaim = User.FindFirstValue(AuthConstants.UserIdClaim)
+                          ?? User.FindFirstValue(ClaimTypes.NameIdentifier)
+                          ?? User.FindFirstValue("sub");
+
+        return int.TryParse(userIdClaim, out userId) && userId > 0;
     }
+
 }
