@@ -41,6 +41,7 @@ builder.Services.AddScoped<IDashboardService, DashboardService>();
 
 builder.Services.AddScoped<IImageRepository>(_ => new ImageRepository(connectionString));
 builder.Services.AddScoped<IImageService, ImageService>();
+builder.Services.AddHttpContextAccessor();
 
 // Firebase Storage e PhotoStorage (pastas: Company/IdCliente/tipo/IdEntidade)
 var firebaseCredentialsPath = builder.Configuration["Firebase:CredentialsPath"];
