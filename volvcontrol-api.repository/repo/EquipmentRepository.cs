@@ -36,7 +36,7 @@ public class EquipmentRepository : IEquipmentRepository
             {
                 request.Name,
                 request.ClientId,
-                request.QrCode,
+                QrCode = string.Empty,
                 request.EquipmentCategoryId,
                 request.EquipmentTypeId,
                 request.Brand,
@@ -58,7 +58,7 @@ public class EquipmentRepository : IEquipmentRepository
                 Id = id,
                 Name = request.Name,
                 ClientId = request.ClientId,
-                QrCode = request.QrCode,
+                QrCode = string.Empty,
                 EquipmentCategoryId = request.EquipmentCategoryId,
                 EquipmentTypeId = request.EquipmentTypeId,
                 Brand = request.Brand,
@@ -94,7 +94,7 @@ public class EquipmentRepository : IEquipmentRepository
         {
             const string sql = @"
             UPDATE equipment
-            SET name = @Name, client_id = @ClientId, qr_code = @QrCode,
+            SET name = @Name, client_id = @ClientId,
                 equipment_category_id = @EquipmentCategoryId, equipment_type_id = @EquipmentTypeId, brand = @Brand, model = @Model,
                 installation_date = @InstallationDate, warranty_until = @WarrantyUntil, status_equipment_id = @StatusEquipmentId,
                 photo_url = @PhotoUrl, notes = @Notes, updated_date = @UpdatedDate
@@ -106,7 +106,6 @@ public class EquipmentRepository : IEquipmentRepository
                 request.Id,
                 request.Name,
                 request.ClientId,
-                request.QrCode,
                 request.EquipmentCategoryId,
                 request.EquipmentTypeId,
                 request.Brand,
@@ -150,6 +149,39 @@ public class EquipmentRepository : IEquipmentRepository
         {
             await _errorLogger.LogAsync(nameof(EquipmentRepository), nameof(UpdateAsync), ex, cancellationToken);
             throw new InvalidOperationException($"Error on UpdateAsync (Equipment): {ex.Message}", ex);
+        }
+    }
+
+    public async Task<bool> UpdateQrCodeAsync(int equipmentId, string qrCodeUrl, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            const string sql = @"
+            UPDATE equipment
+            SET qr_code = @QrCode, updated_date = @UpdatedDate
+            WHERE id = @Id";
+
+            await using var conn = new MySqlConnection(_connectionString);
+            await conn.OpenAsync(cancellationToken);
+
+            var rows = await conn.ExecuteAsync(new CommandDefinition(sql, new
+            {
+                Id = equipmentId,
+                QrCode = qrCodeUrl,
+                UpdatedDate = DateTime.UtcNow
+            }, cancellationToken: cancellationToken));
+
+            return rows > 0;
+        }
+        catch (MySqlException ex)
+        {
+            await _errorLogger.LogAsync(nameof(EquipmentRepository), nameof(UpdateQrCodeAsync), ex, cancellationToken);
+            throw new InvalidOperationException($"Database error on UpdateQrCodeAsync (Equipment): {ex.Message}", ex);
+        }
+        catch (Exception ex)
+        {
+            await _errorLogger.LogAsync(nameof(EquipmentRepository), nameof(UpdateQrCodeAsync), ex, cancellationToken);
+            throw new InvalidOperationException($"Error on UpdateQrCodeAsync (Equipment): {ex.Message}", ex);
         }
     }
 
@@ -271,6 +303,50 @@ public class EquipmentRepository : IEquipmentRepository
         {
             await _errorLogger.LogAsync(nameof(EquipmentRepository), nameof(GetAllByUserIdAsync), ex, cancellationToken);
             throw new InvalidOperationException($"Error on GetAllByUserIdAsync (Equipment): {ex.Message}", ex);
+        }
+    }
+
+    public async Task<IReadOnlyList<EquipmentServiceRequestItem>> GetServiceRequestsByEquipmentIdsAsync(IReadOnlyCollection<int> equipmentIds, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            if (equipmentIds.Count == 0)
+                return Array.Empty<EquipmentServiceRequestItem>();
+
+            await using var conn = new MySqlConnection(_connectionString);
+            await conn.OpenAsync(cancellationToken);
+
+            const string sql = @"
+            SELECT
+                sr.equipment_id AS EquipmentId,
+                sr.id AS IdServiceRequeist,
+                sr.request_number AS RequestNumber,
+                sr.client_id AS ClientId,
+                c.name AS ClientName,
+                c.document AS ClientDocument,
+                ssr.description AS StatusServiceRequestDescription,
+                tmr.description AS TypeMaintenanceRecordDescription
+            FROM service_request sr
+            INNER JOIN client c ON c.id = sr.client_id
+            INNER JOIN status_service_request ssr ON ssr.id = sr.status_service_request_id
+            INNER JOIN type_maintenance_record tmr ON tmr.id = sr.type_maintenance_record_id
+            WHERE sr.equipment_id IN @EquipmentIds
+            ORDER BY sr.id DESC";
+
+            var rows = await conn.QueryAsync<EquipmentServiceRequestItem>(
+                new CommandDefinition(sql, new { EquipmentIds = equipmentIds }, cancellationToken: cancellationToken));
+
+            return rows.ToList();
+        }
+        catch (MySqlException ex)
+        {
+            await _errorLogger.LogAsync(nameof(EquipmentRepository), nameof(GetServiceRequestsByEquipmentIdsAsync), ex, cancellationToken);
+            throw new InvalidOperationException($"Database error on GetServiceRequestsByEquipmentIdsAsync (Equipment): {ex.Message}", ex);
+        }
+        catch (Exception ex)
+        {
+            await _errorLogger.LogAsync(nameof(EquipmentRepository), nameof(GetServiceRequestsByEquipmentIdsAsync), ex, cancellationToken);
+            throw new InvalidOperationException($"Error on GetServiceRequestsByEquipmentIdsAsync (Equipment): {ex.Message}", ex);
         }
     }
 

@@ -4,6 +4,7 @@ using volvcontrol_api.domain.Interfaces.Service;
 using volvcontrol_api.domain.Model.Request;
 using volvcontrol_api.domain.Model.Response;
 using volvcontrol_api.service.firebase;
+using QRCoder;
 
 namespace volvcontrol_api.service.services;
 
@@ -25,6 +26,13 @@ public class EquipmentService : IEquipmentService
 
         var photoUrl = await TryUploadBase64ImageAsync(request.ImageBase64, request.ClientId, cancellationToken);
         var entity = await _repository.CreateAsync(request, photoUrl, cancellationToken);
+
+        var qrCodeUrl = await GenerateAndUploadEquipmentQrCodeAsync(entity.Id, request.ClientId, cancellationToken);
+        var updatedQrCode = await _repository.UpdateQrCodeAsync(entity.Id, qrCodeUrl, cancellationToken);
+        if (!updatedQrCode)
+            throw new InvalidOperationException("Nao foi possivel atualizar o QR Code do equipamento apos criar.");
+
+        entity.QrCode = qrCodeUrl;
         return ToResponse(entity);
     }
 
@@ -59,6 +67,10 @@ public class EquipmentService : IEquipmentService
             return null;
 
         var response = ToResponse(entity);
+        var serviceRequests = await _repository.GetServiceRequestsByEquipmentIdsAsync(new[] { id }, cancellationToken);
+        response.ServiceRequests = serviceRequests
+            .Select(ToServiceRequestResponse)
+            .ToList();
         response.ImageBase64 = await TryGetImageBase64Async(entity.PhotoUrl, cancellationToken);
         return response;
     }
@@ -69,7 +81,18 @@ public class EquipmentService : IEquipmentService
             throw new ArgumentException("userId deve ser maior que zero.");
 
         var entities = await _repository.GetAllByUserIdAsync(userId, cancellationToken);
-        return entities.Select(ToResponse).ToList();
+        var responses = entities.Select(ToResponse).ToList();
+
+        var equipmentIds = responses.Select(x => x.Id).ToList();
+        var serviceRequests = await _repository.GetServiceRequestsByEquipmentIdsAsync(equipmentIds, cancellationToken);
+        var serviceRequestsByEquipmentId = serviceRequests
+            .GroupBy(x => x.EquipmentId)
+            .ToDictionary(g => g.Key, g => g.Select(ToServiceRequestResponse).ToList());
+
+        foreach (var response in responses)
+            response.ServiceRequests = serviceRequestsByEquipmentId.TryGetValue(response.Id, out var requests) ? requests : new List<EquipmentServiceRequestResponse>();
+
+        return responses;
     }
 
     public async Task<bool> DeleteAsync(int id, CancellationToken cancellationToken = default)
@@ -117,10 +140,50 @@ public class EquipmentService : IEquipmentService
             StatusEquipmentDescription = entity.StatusEquipmentDescription ?? string.Empty,
             PhotoUrl = entity.PhotoUrl,
             ImageBase64 = string.Empty,
+            ServiceRequests = new List<EquipmentServiceRequestResponse>(),
             Notes = entity.Notes,
             CreatedDate = entity.CreatedDate,
             UpdatedDate = entity.UpdatedDate
         };
+    }
+
+    private static EquipmentServiceRequestResponse ToServiceRequestResponse(EquipmentServiceRequestItem item)
+    {
+        return new EquipmentServiceRequestResponse
+        {
+            IdServiceRequeist = item.IdServiceRequeist,
+            RequestNumber = item.RequestNumber,
+            ClientId = item.ClientId,
+            ClientName = item.ClientName,
+            ClientDocument = item.ClientDocument,
+            StatusServiceRequestDescription = item.StatusServiceRequestDescription,
+            TypeMaintenanceRecordDescription = item.TypeMaintenanceRecordDescription
+        };
+    }
+
+    private async Task<string> GenerateAndUploadEquipmentQrCodeAsync(int equipmentId, int clientId, CancellationToken cancellationToken)
+    {
+        var payload = equipmentId.ToString();
+
+        using var generator = new QRCodeGenerator();
+        using var qrData = generator.CreateQrCode(payload, QRCodeGenerator.ECCLevel.Q);
+        var pngQrCode = new PngByteQRCode(qrData);
+        var qrCodeBytes = pngQrCode.GetGraphic(20);
+
+        await using var content = new MemoryStream(qrCodeBytes);
+        var fileName = $"equipment-qrcode-{equipmentId}.png";
+        var objectName = await _photoStorage.UploadAsync(
+            content,
+            fileName,
+            "image/png",
+            cancellationToken,
+            "VolvControl",
+            "Equipamento",
+            clientId.ToString(),
+            equipmentId.ToString(),
+            "QRCode");
+
+        return _photoStorage.GetPermanentUrl(objectName);
     }
 
     private async Task<string> TryUploadBase64ImageAsync(string imageBase64, int clientId, CancellationToken cancellationToken)

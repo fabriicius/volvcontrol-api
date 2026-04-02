@@ -81,6 +81,7 @@ public class ServiceRequestService : IServiceRequestService
             RequestNumber = i.RequestNumber,
             ClientId = i.ClientId,
             ClientName = i.ClientName,
+            EquipmentName = i.EquipmentName,
             ClientDocument = i.ClientDocument,
             StatusServiceRequestId = i.StatusServiceRequestId,
             StatusServiceRequestDescription = i.StatusServiceRequestDescription,

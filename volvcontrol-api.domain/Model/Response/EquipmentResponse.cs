@@ -21,6 +21,7 @@ public class EquipmentResponse
     public string PhotoUrl { get; set; } = string.Empty;
     [JsonPropertyName("imagebase64")]
     public string ImageBase64 { get; set; } = string.Empty;
+    public List<EquipmentServiceRequestResponse> ServiceRequests { get; set; } = new();
     public string Notes { get; set; } = string.Empty;
     public DateTime CreatedDate { get; set; }
     public DateTime UpdatedDate { get; set; }

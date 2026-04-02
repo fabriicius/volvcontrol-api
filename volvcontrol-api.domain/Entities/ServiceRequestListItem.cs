@@ -6,6 +6,7 @@ public class ServiceRequestListItem
     public string RequestNumber { get; set; } = string.Empty;
     public int ClientId { get; set; }
     public string ClientName { get; set; } = string.Empty;
+    public string EquipmentName { get; set; } = string.Empty;
     public string ClientDocument { get; set; } = string.Empty;
     public int StatusServiceRequestId { get; set; }
     public string StatusServiceRequestDescription { get; set; } = string.Empty;

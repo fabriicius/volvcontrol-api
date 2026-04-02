@@ -188,6 +188,7 @@ public class ServiceRequestRepository : IServiceRequestRepository
                 sr.request_number AS RequestNumber,
                 sr.client_id AS ClientId,
                 c.name AS ClientName,
+                e.name AS EquipmentName,
                 c.document AS ClientDocument,
                 sr.status_service_request_id AS StatusServiceRequestId,
                 ssr.description AS StatusServiceRequestDescription,
@@ -195,6 +196,7 @@ public class ServiceRequestRepository : IServiceRequestRepository
                 tmr.description AS TypeMaintenanceRecordDescription
             FROM service_request sr
             INNER JOIN client c ON c.id = sr.client_id
+            INNER JOIN equipment e ON e.id = sr.equipment_id
             INNER JOIN users u ON u.id = @UserId
             INNER JOIN status_service_request ssr ON ssr.id = sr.status_service_request_id
             INNER JOIN type_maintenance_record tmr ON tmr.id = sr.type_maintenance_record_id

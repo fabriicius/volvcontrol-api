@@ -32,12 +32,12 @@ public class EquipmentController : ControllerBase
     /// <summary>Obtém equipamento por id.</summary>
     [HttpGet("{id:int}")]
     [ProducesResponseType(typeof(EquipmentResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<ActionResult<EquipmentResponse>> GetById(int id, CancellationToken cancellationToken)
     {
         var result = await _equipmentService.GetByIdAsync(id, cancellationToken);
         if (result is null)
-            return NotFound();
+            return NoContent();
         return Ok(result);
     }
 
